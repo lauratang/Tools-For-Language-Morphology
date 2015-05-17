@@ -91,6 +91,7 @@ public class FLEx extends JFrame {
 		newSense = new JButton();
 		entriesLabel = new JLabel();
 		entryLabel = new JLabel();
+		deleteEntryButton = new JButton();
 		entryLexemeForm = new JLabel();
 		dialogNewEntry = new JDialog();
 		senseNewEntry = new JDialog();
@@ -115,7 +116,7 @@ public class FLEx extends JFrame {
 				"<Unknown Complex Form>", "Compound", "Contraction",
 				"Derivative", "Idiom", "Phrasal Verb", "Saying" };
 		complexFormComboBox = new JComboBox(complexFormItems);
-		separator = new JSeparator();
+		separator = new JSeparator(SwingConstants.HORIZONTAL);
 		glossLabel = new JLabel();
 		Gloss = new JTextField();
 		inflectionalLabel = new JLabel();
@@ -177,6 +178,7 @@ public class FLEx extends JFrame {
 			
 			// ---- saveFile ----
 			saveFile.setText("Save File");
+			saveFile.setFont(entryLabel.getFont());
 			saveFile.setActionCommand("Save File");
 			saveFile.addActionListener(new ActionListener() {
 				@Override
@@ -187,6 +189,7 @@ public class FLEx extends JFrame {
 
 			// ---- retrieveFile ----
 			retrieveFile.setText("Open File");
+			retrieveFile.setFont(entryLabel.getFont());
 			retrieveFile.setActionCommand("Open File");
 			retrieveFile.addActionListener(new ActionListener() {
 				@Override
@@ -197,6 +200,7 @@ public class FLEx extends JFrame {
 
 			// ---- addEntry ----
 			addEntry.setText("New Entry");
+			addEntry.setFont(entryLabel.getFont());
 			addEntry.setActionCommand("New Entry");
 			addEntry.addActionListener(new ActionListener() {
 				@Override
@@ -206,12 +210,28 @@ public class FLEx extends JFrame {
 			});
 			
 			// ---- newSense ----
-			newSense.setText("Add Sense to Current Word");
+			newSense.setText("Add Sense to Selected Entry");
+			newSense.setFont(entryLabel.getFont());
 			newSense.setActionCommand("Add Sense");
 			newSense.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					newSenseActionPerformed(e);
+				}
+			});
+			
+			// ---- deleteEntry ----
+			deleteEntryButton.setText("Delete Selected Entry");
+			deleteEntryButton.setFont(entryLabel.getFont());
+			deleteEntryButton.setActionCommand("Delete Entry");
+			deleteEntryButton.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					if (table.isRowSelected(table.getSelectedRow())){
+						int row = table.convertRowIndexToModel(table
+							.getSelectedRow());
+						((MyTableModel) table.getModel()).removeRow(row);
+					}
 				}
 			});
 		}
@@ -221,6 +241,8 @@ public class FLEx extends JFrame {
 		 *  ================================================================================
 		 */
 		{	
+			table.setFont(entryLabel.getFont());
+			
 			table.addMouseListener(new MouseAdapter() {
 				public void mousePressed(MouseEvent e) {
 					if (SwingUtilities.isLeftMouseButton(e)) {
@@ -230,6 +252,7 @@ public class FLEx extends JFrame {
 						LexiconObject selected = (LexiconObject) table.getModel().getValueAt(row, 0);
 						
 						entryDisplay.setText(selected.getLexemeForm());
+						entryDisplay.setFont(entryLabel.getFont());
 						morphemeComboDisplay.setSelectedItem(selected
 								.getMorphemeType());
 						
@@ -242,10 +265,15 @@ public class FLEx extends JFrame {
 							
 							// set up
 							JLabel sense = new JLabel();
+							sense.setFont(entryLabel.getFont());
 							JButton delete = new JButton();
+							delete.setFont(entryLabel.getFont());
 							JLabel gloss = new JLabel();
+							gloss.setFont(entryLabel.getFont());
 							JLabel gram = new JLabel();
+							gram.setFont(entryLabel.getFont());
 							JTextField glossText = new JTextField();
+							glossText.setFont(entryLabel.getFont());
 							glossText.setMaximumSize(new Dimension(1000,100));
 							String[] categoryItems = { "Adjective", "Adposition", "Adverb",
 									"Classifier", "Connective", "Determiner", "Enclitic",
@@ -253,6 +281,7 @@ public class FLEx extends JFrame {
 									"Particle", "Interrogative pro-form", "Pro-adverb", "Pronoun",
 									"Intransitive verb", "Transitive verb", "<Not Sure>"};
 							JComboBox gramComboBox = new JComboBox(categoryItems);
+							gramComboBox.setFont(entryLabel.getFont());
 							
 							JPanel sensePanel = new JPanel();
 							sensePanel.setLayout(new BoxLayout(sensePanel, BoxLayout.X_AXIS));
@@ -343,7 +372,7 @@ public class FLEx extends JFrame {
 			
 							// format
 							sensePanel.add(sense);
-							if (start != 1) {
+							if (stop != 1) {
 								sensePanel.add(delete);
 							}
 							glossPanel.add(gloss);
@@ -366,9 +395,11 @@ public class FLEx extends JFrame {
 
 					if (SwingUtilities.isRightMouseButton(e)) {
 						JTable target = (JTable) e.getSource();
-						int row = target.convertRowIndexToModel(target
-								.getSelectedRow());
-						((MyTableModel) table.getModel()).removeRow(row);
+						if (table.hasFocus()) {
+							int row = target.convertRowIndexToModel(target
+									.getSelectedRow());
+							((MyTableModel) table.getModel()).removeRow(row);
+						}
 					}
 
 				}
@@ -381,7 +412,9 @@ public class FLEx extends JFrame {
 		 */ 
 		{
 			entryLexemeForm.setText("Lexeme Form:");
-			panel1dsenses.setLayout(new BoxLayout(panel1dsenses, BoxLayout.Y_AXIS));
+			entryLexemeForm.setFont(entryLabel.getFont());
+			currentMorph.setFont(entryLabel.getFont());
+			morphemeComboDisplay.setFont(entryLabel.getFont());
 			morphemeComboDisplay.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
@@ -453,6 +486,7 @@ public class FLEx extends JFrame {
 		toolbarPanel.add(retrieveFile);
 		toolbarPanel.add(addEntry);
 		toolbarPanel.add(newSense);
+		toolbarPanel.add(deleteEntryButton);
 		
 		JPanel panel1b = new JPanel();
 		panel1b.setLayout(new BoxLayout(panel1b, BoxLayout.X_AXIS));
@@ -479,6 +513,7 @@ public class FLEx extends JFrame {
 		panel1d.add(panel1dlex);
 		panel1d.add(panel1dmorph);
 		panel1d.add(new JSeparator(SwingConstants.HORIZONTAL));
+		panel1dsenses.setLayout(new BoxLayout(panel1dsenses, BoxLayout.Y_AXIS));
 		panel1d.add(panel1dsenses);
 		
 		panel1b.add(panel1c);
@@ -1023,8 +1058,6 @@ public class FLEx extends JFrame {
 			dialogNewEntry.pack();
 			dialogNewEntry.setLocationRelativeTo(dialogNewEntry.getOwner());
 
-			
-			
 			newSensePanel.setLayout(new FlowLayout());
 			newSensePanel.add(glossLabel2);
 			newSensePanel.add(Glossb);
@@ -1073,6 +1106,7 @@ public class FLEx extends JFrame {
 	private JButton newSense;
 	private JLabel entriesLabel;
 	private JLabel entryLabel;
+	private JButton deleteEntryButton;
 	private JLabel entryLexemeForm;
 	private JDialog dialogNewEntry;
 	private JDialog senseNewEntry;
@@ -1108,7 +1142,7 @@ public class FLEx extends JFrame {
 	/** ================================================================================
 	 * 							Table Model and ActionListeners
 	 * 
-	 *  MyTableModel, MultiLine Cell Renderer,
+	 *  MyTableModel, MultiLine Cell Renderer classes
 	 *  New Entry Action Listener, New Sense Action Listener,
 	 *  New Entry: Create Action Listener, New Sense Create Action Listener,
 	 *  Delete Sense Action Listener, New Entry: Close Action Listener,
@@ -1192,7 +1226,7 @@ public class FLEx extends JFrame {
 	// ======= New Sense ActionListener =======
 	private void newSenseActionPerformed(ActionEvent e) {
 		if (e.getSource() == newSense) {
-			senseNewEntry.setVisible(true);
+				senseNewEntry.setVisible(true);
 		}
 	}
 
@@ -1226,121 +1260,141 @@ public class FLEx extends JFrame {
 		String newSense = Glossb.getText();
 		String newCategory = (String) categoryComboBox2.getSelectedItem();
 		selected.addSense(newSense, newCategory);
-		int senseNumber = selected.getSenseCount();
+		panel1d.remove(panel1dsenses);
+		panel1dsenses.removeAll();
 		
-		// set-up
-		JLabel sense = new JLabel();
-		JButton delete = new JButton();
-		JLabel gloss = new JLabel();
-		JLabel gram = new JLabel();
-		JTextField glossText = new JTextField();
-		glossText.setMaximumSize(new Dimension(1000,100));
-		String[] categoryItems = { "Adjective", "Adposition", "Adverb",
-				"Classifier", "Connective", "Determiner", "Enclitic",
-				"English numbers", "Interjection", "Noun", "Numeral",
-				"Particle", "Interrogative pro-form", "Pro-adverb", "Pronoun",
-				"Intransitive verb", "Transitive verb", "<Not Sure>"};
-		JComboBox gramComboBox = new JComboBox(categoryItems);
-		
-		JPanel sensePanel = new JPanel();
-		sensePanel.setLayout(new BoxLayout(sensePanel, BoxLayout.X_AXIS));
-		JPanel glossPanel = new JPanel();
-		glossPanel.setLayout(new BoxLayout(glossPanel, BoxLayout.X_AXIS));
-		JPanel gramPanel = new JPanel();
-		gramPanel.setLayout(new BoxLayout(gramPanel, BoxLayout.X_AXIS));
+		int start = 1;
+		int stop = selected.getSenseCount();
+		while (start <= stop) {
 			
-		// fill
-		sense.setText("Sense " + String.valueOf(senseNumber));
-		delete.setText("Delete");
-		gloss.setText("Gloss: ");
-		gram.setText("Grammatical Info.: ");
-		glossText.setText(selected.getGloss(senseNumber));
-		int index = -1;
-		for (int i = 0; i<categoryItems.length; i++) {
-			if (categoryItems[i].equals(selected.getCategory(senseNumber))) {
-				index = i;
+			// set up
+			JLabel sense = new JLabel();
+			sense.setFont(entryLabel.getFont());
+			JButton delete = new JButton();
+			delete.setFont(entryLabel.getFont());
+			JLabel gloss = new JLabel();
+			gloss.setFont(entryLabel.getFont());
+			JLabel gram = new JLabel();
+			gram.setFont(entryLabel.getFont());
+			JTextField glossText = new JTextField();
+			glossText.setFont(entryLabel.getFont());
+			glossText.setMaximumSize(new Dimension(1000,100));
+			String[] categoryItems = { "Adjective", "Adposition", "Adverb",
+					"Classifier", "Connective", "Determiner", "Enclitic",
+					"English numbers", "Interjection", "Noun", "Numeral",
+					"Particle", "Interrogative pro-form", "Pro-adverb", "Pronoun",
+					"Intransitive verb", "Transitive verb", "<Not Sure>"};
+			JComboBox gramComboBox = new JComboBox(categoryItems);
+			gramComboBox.setFont(entryLabel.getFont());
+			
+			JPanel sensePanel = new JPanel();
+			sensePanel.setLayout(new BoxLayout(sensePanel, BoxLayout.X_AXIS));
+			JPanel glossPanel = new JPanel();
+			glossPanel.setLayout(new BoxLayout(glossPanel, BoxLayout.X_AXIS));
+			JPanel gramPanel = new JPanel();
+			gramPanel.setLayout(new BoxLayout(gramPanel, BoxLayout.X_AXIS));
+			
+			// fill
+			sense.setText("Sense " + String.valueOf(start));
+			delete.setText("Delete");
+			gloss.setText("Gloss: ");
+			gram.setText("Grammatical Info.: ");
+			glossText.setText(selected.getGloss(start));
+			int index = -1;
+			for (int i = 0; i<categoryItems.length; i++) {
+				if (categoryItems[i].equals(selected.getCategory(start))) {
+					index = i;
+				}
 			}
+			gramComboBox.setSelectedIndex(index);
+			
+			// add Delete, Gloss and ComboBox Listeners
+			final int s = start;
+			
+			delete.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					deleteSenseActionListener(e, s);
+				}
+			});
+			
+			final JTextField g = glossText;
+			glossText.addMouseListener(new MouseAdapter() {
+				public void mousePressed(MouseEvent e) {
+					g.getDocument().addDocumentListener(new DocumentListener() {
+
+						@Override
+						public void insertUpdate(DocumentEvent e) {
+							Document doc = (Document) e.getDocument();
+							String text;
+							try {
+								text = doc.getText(0, doc.getLength());
+								int row = table.convertRowIndexToModel(table.getSelectedRow());
+								LexiconObject selected = (LexiconObject) table.getModel().getValueAt(row, 0);
+								selected.setGloss(s, text);
+								((MyTableModel) table.getModel()).fireTableRowsUpdated(row,row);
+							} catch (BadLocationException e1) {e1.printStackTrace();}
+						}
+
+						@Override
+						public void removeUpdate(DocumentEvent e) {
+							Document doc = (Document) e.getDocument();
+							String text;
+							try {
+								text = doc.getText(0, doc.getLength());
+								int row = table.convertRowIndexToModel(table.getSelectedRow());
+								LexiconObject selected = (LexiconObject) table.getModel().getValueAt(row, 0);
+								selected.setGloss(s, text);
+								((MyTableModel) table.getModel()).fireTableRowsUpdated(row,row);
+							} catch (BadLocationException e1) {e1.printStackTrace();}
+						}
+
+						@Override
+						public void changedUpdate(DocumentEvent e) {
+							Document doc = (Document) e.getDocument();
+							String text;
+							try {
+								text = doc.getText(0, doc.getLength());
+								int row = table.convertRowIndexToModel(table.getSelectedRow());
+								LexiconObject selected = (LexiconObject) table.getModel().getValueAt(row, 0);
+								selected.setGloss(s, text);
+								((MyTableModel) table.getModel()).fireTableRowsUpdated(row,row);
+							} catch (BadLocationException e1) {e1.printStackTrace();}
+						}
+
+					});
+				}
+			});
+			
+			final JComboBox b = gramComboBox;
+			gramComboBox.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					gramChangeActionPerformed(e, s, b);
+				}
+			});
+
+			// format
+			sensePanel.add(sense);
+			if (stop != 1) {
+				sensePanel.add(delete);
+			}
+			glossPanel.add(gloss);
+			glossPanel.add(glossText);
+			gramPanel.add(gram);
+			gramPanel.add(gramComboBox);
+			
+			panel1dsenses.add(sensePanel);
+			panel1dsenses.add(glossPanel);
+			panel1dsenses.add(gramPanel);
+			panel1dsenses.add(new JSeparator(SwingConstants.HORIZONTAL));
+			
+			start++;
 		}
-		gramComboBox.setSelectedIndex(index);
-			
-		// add Delete, Gloss and ComboBox Change Listeners
-		final int s = senseNumber;
-		delete.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				deleteSenseActionListener(e, s);
-			}
-		});
-		
-		final JTextField g = glossText;
-		glossText.addMouseListener(new MouseAdapter() {
-			public void mousePressed(MouseEvent e) {
-				g.getDocument().addDocumentListener(new DocumentListener() {
 
-					@Override
-					public void insertUpdate(DocumentEvent e) {
-						Document doc = (Document) e.getDocument();
-						String text;
-						try {
-							text = doc.getText(0, doc.getLength());
-							int row = table.convertRowIndexToModel(table.getSelectedRow());
-							LexiconObject selected = (LexiconObject) table.getModel().getValueAt(row, 0);
-							selected.setGloss(s, text);
-							((MyTableModel) table.getModel()).fireTableRowsUpdated(row,row);
-						} catch (BadLocationException e1) {e1.printStackTrace();}
-					}
-
-					@Override
-					public void removeUpdate(DocumentEvent e) {
-						Document doc = (Document) e.getDocument();
-						String text;
-						try {
-							text = doc.getText(0, doc.getLength());
-							int row = table.convertRowIndexToModel(table.getSelectedRow());
-							LexiconObject selected = (LexiconObject) table.getModel().getValueAt(row, 0);
-							selected.setGloss(s, text);
-							((MyTableModel) table.getModel()).fireTableRowsUpdated(row,row);
-						} catch (BadLocationException e1) {e1.printStackTrace();}
-					}
-
-					@Override
-					public void changedUpdate(DocumentEvent e) {
-						Document doc = (Document) e.getDocument();
-						String text;
-						try {
-							text = doc.getText(0, doc.getLength());
-							int row = table.convertRowIndexToModel(table.getSelectedRow());
-							LexiconObject selected = (LexiconObject) table.getModel().getValueAt(row, 0);
-							selected.setGloss(s, text);
-							((MyTableModel) table.getModel()).fireTableRowsUpdated(row,row);
-						} catch (BadLocationException e1) {e1.printStackTrace();}
-					}
-
-				});
-			}
-		});
-		
-		final JComboBox b = gramComboBox;
-		gramComboBox.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				gramChangeActionPerformed(e, s, b);
-			}
-		});
-
-		// format
-		sensePanel.add(sense);
-		sensePanel.add(delete);
-		glossPanel.add(gloss);
-		glossPanel.add(glossText);
-		gramPanel.add(gram);
-		gramPanel.add(gramComboBox);
-		
-		panel1dsenses.add(sensePanel);
-		panel1dsenses.add(glossPanel);
-		panel1dsenses.add(gramPanel);
-		panel1dsenses.add(new JSeparator(SwingConstants.HORIZONTAL));
+		panel1d.add(panel1dsenses);
 		panel1d.updateUI();
+		
 		
 		table.setRowHeight(row, (rowHeight * selected.getSenseCount()) + 2);
 		((MyTableModel) table.getModel()).fireTableRowsUpdated(row,row);
@@ -1370,10 +1424,15 @@ public class FLEx extends JFrame {
 			
 			// Set up
 			JLabel sense = new JLabel();
+			sense.setFont(entryLabel.getFont());
 			JButton delete = new JButton();
+			delete.setFont(entryLabel.getFont());
 			JLabel gloss = new JLabel();
+			gloss.setFont(entryLabel.getFont());
 			JLabel gram = new JLabel();
+			gram.setFont(entryLabel.getFont());
 			JTextField glossText = new JTextField();
+			glossText.setFont(entryLabel.getFont());
 			glossText.setMaximumSize(new Dimension(1000,100));
 			String[] categoryItems = { "Adjective", "Adposition", "Adverb",
 					"Classifier", "Connective", "Determiner", "Enclitic",
@@ -1381,6 +1440,7 @@ public class FLEx extends JFrame {
 					"Particle", "Interrogative pro-form", "Pro-adverb", "Pronoun",
 					"Intransitive verb", "Transitive verb", "<Not Sure>"};
 			JComboBox gramComboBox = new JComboBox(categoryItems);
+			gramComboBox.setFont(entryLabel.getFont());
 			
 			JPanel sensePanel = new JPanel();
 			sensePanel.setLayout(new BoxLayout(sensePanel, BoxLayout.X_AXIS));
@@ -1471,7 +1531,9 @@ public class FLEx extends JFrame {
 
 			// format
 			sensePanel.add(sense);
-			sensePanel.add(delete);
+			if (stop != 1) {
+				sensePanel.add(delete);
+			}
 			glossPanel.add(gloss);
 			glossPanel.add(glossText);
 			gramPanel.add(gram);
